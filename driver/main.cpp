@@ -83,6 +83,9 @@ void gendocfile(Module *m);
 // In dmd/mars.d
 void generateJson(Modules *modules);
 
+// In driver/mars.d
+extern "C" void do_lowmem();
+
 using namespace opts;
 
 static StringsAdapter impPathsStore("I", global.params.imppath);
@@ -294,6 +297,12 @@ void parseCommandLine(Strings &sourceFiles) {
     }
     if (strncmp(arg, "--DRT-", 6) != 0)
       filteredArgs.push_back(arg);
+
+    // if -lowmem and gc is disabled, it was added via config
+    if (strcmp(arg, "-lowmem") == 0 || strcmp(arg, "--lowmem") == 0) {
+      if (!mem.isGCEnabled())
+        do_lowmem();
+    }
   }
 
   cl::ParseCommandLineOptions(filteredArgs.size(),

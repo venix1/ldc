@@ -27,6 +27,32 @@ extern(C) int _Dmain(string[])
     return cppmain();
 }
 
+extern(C) void do_lowmem()
+{
+    import core.runtime : Runtime;
+
+    // Get args and append -lowmem
+    auto commandLine = Runtime.args ~ "-lowmem";
+    version (Posix)
+    {
+        import std.process;
+        execv(commandLine[0], commandLine);
+        throw new Exception("Failed to restart with -lowmem");
+    }
+    /* Should work but needs testing
+    else version (Windows)
+    {
+        import core.stdc.stdlib : _Exit;
+        _Exit(wait(spawnProcess(commandLine)));
+    }
+    */
+    else
+    {
+        // no more silently ignoring this
+        throw new Exception("-lowmem cannot be set in configuration file for this platform");
+    }
+}
+
 // We use UTF-8 for narrow strings, on Windows too.
 version (Windows)
 {
